@@ -164,3 +164,181 @@ BEGIN
 END;
 
 --------------------------------------------------------
+
+--Bloco Variáveil Bind
+
+SET SERVEROUTPUT ON
+VARIABLE gmedia NUMBER
+DECLARE
+    vnumero1 NUMBER(11,2) := 2000;
+    vnumero2 NUMBER(11,2) := 5000;
+BEGIN
+  :gmedia := (vnumero1 + vnumero2) / 2;
+  DBMS_OUTPUT.PUT_LINE('Média = ' || TO_CHAR(:gmedia));
+  EXCEPTION
+    WHEN OTHERS
+    THEN
+        DBMS_OUTPUT.PUT_LINE('Erro Oracle' || SQLCODE || SQLERRM);
+END;
+
+--------------------------------------------------------
+
+--Bloco Funções
+
+SET SERVEROUTPUT ON
+DECLARE
+  vNumero1  NUMBER(13,2);  -- Declaração de variável para o Primeiro número
+  vNumero2  NUMBER(13,2);  -- Declaração de variável para o Segundo número
+  vMedia    NUMBER(13,2);  -- Declaração de variável para a Média
+BEGIN
+  /* Cálculo do valor da média entre dois números
+     Autor: Emílio Scudero
+     Data: 05/05/2020 */
+	 
+  vNumero1  :=  5000.8888;
+  vNumero2  :=  3000.4444;
+  vMedia    :=  ROUND((vNumero1 + vNumero2) / 2, 2);
+  DBMS_OUTPUT.PUT_LINE('vnumero1 = ' || vnumero1);  -- Impressão do Primeiro Número
+  DBMS_OUTPUT.PUT_LINE('vnumero2 = ' || vnumero2);  -- Impressão do Segundo Número
+  DBMS_OUTPUT.PUT_LINE('Media = ' || TO_CHAR(vMedia,'99G999G999D99'));     -- Impressão da Média calculada 
+END;
+
+--------------------------------------------------------
+
+--Bloco Utilizando SQL com PLSQL - Select
+
+SET SERVEROUTPUT ON
+DECLARE
+  vFirst_name employees.first_name%Type;
+  vLast_name employees.last_name%Type;
+  vSalary employees.salary%Type;
+  vEmployees_id employees.employee_id%Type := 121;
+BEGIN
+  SELECT 
+    first_name, 
+    last_name, 
+    salary
+  INTO 
+    vFirst_name, 
+    vLast_name, 
+    vSalary 
+  FROM employees 
+  WHERE employee_id = vEmployees_id;
+  DBMS_OUTPUT.PUT_LINE('Employees id = ' || vEmployees_id);
+  DBMS_OUTPUT.PUT_LINE('First Name = ' || vFirst_name);
+  DBMS_OUTPUT.PUT_LINE('Last Name = ' || vLast_name);
+  DBMS_OUTPUT.PUT_LINE('Salary = ' || vSalary);
+  EXCEPTION
+    WHEN OTHERS
+    THEN
+        DBMS_OUTPUT.PUT_LINE('Erro Oracle' || SQLCODE || SQLERRM);
+END;
+--------------------------------------------------------
+
+--Bloco Utilizando SQL com PLSQL - Insert
+
+SET SERVEROUTPUT ON
+DECLARE
+   vfirst_name  employees.first_name%type;
+   vlast_name   employees.last_name%type;
+   vsalary      employees.salary%type;
+BEGIN
+   INSERT INTO employees 
+   (employee_id, first_name, last_name, email, phone_number, hire_date,
+    job_id, salary, commission_pct, manager_id, department_id)
+    VALUES 
+    (employees_seq.nextval, 'Kobe', 'Bryant', 'KBRYANT', '515.123.45568', SYSDATE,
+     'IT_PROG', 15000, 0.4, 103, 60);
+   COMMIT;  
+END;
+
+--------------------------------------------------------
+
+--Bloco Utilizando SQL com PLSQL - Update
+
+SET SERVEROUTPUT ON
+DECLARE
+   vEmployee_id    employees.employee_id%type := 207;
+   vPercentual     NUMBER(3) := 10;
+BEGIN
+   UPDATE employees 
+   SET    salary = salary * (1 + vPercentual / 100)
+   WHERE  employee_id =  vEmployee_id;
+   COMMIT;  
+END;
+
+--------------------------------------------------------
+
+--Bloco Utilizando SQL com PLSQL - Delete
+
+SET SERVEROUTPUT ON
+DECLARE
+   vEmployee_id    employees.employee_id%type := 207;
+BEGIN
+   DELETE FROM employees
+   WHERE  employee_id =  vEmployee_id;
+   COMMIT;  
+END;
+
+----------------------------------------------------------
+
+--Bloco Savepoint
+
+SET SERVEROUTPUT ON
+DECLARE
+   vEmployee_id    employees.employee_id%type := 150;
+BEGIN
+   UPDATE employees 
+   SET    salary = 15000
+   WHERE  employee_id =  vEmployee_id;
+   COMMIT;  
+END;
+
+SET SERVEROUTPUT ON
+DECLARE
+   vEmployee_id    employees.employee_id%type := 150;
+BEGIN
+   UPDATE employees 
+   SET    salary = 20000
+   WHERE  employee_id =  vEmployee_id;
+   ROLLBACK;  
+END;
+
+BEGIN
+    INSERT INTO employees 
+    (employee_id, first_name, last_name, email, phone_number, hire_date,
+    job_id, salary, commission_pct, manager_id, department_id)
+    VALUES 
+    (employees_seq.nextval, 'Kobe', 'Bryant', 'KBRYANT', '515.123.45568', SYSDATE,
+    'IT_PROG', 15000, 0.4, 103, 60);
+    
+    SAVEPOINT INSERTOK;
+    
+    UPDATE employees 
+    SET    salary = 30000
+    WHERE  job_id = 'IT_PROG';
+    
+    ROLLBACK TO INSERTOK;
+    COMMIT;
+END;
+
+----------------------------------------------------------
+
+--Bloco Cursor Implícito
+
+SET SERVEROUTPUT ON
+DECLARE
+   vdepartment_id  employees.department_id%type := 60;
+   vpercentual     NUMBER(3) := 10;
+BEGIN
+   UPDATE employees 
+   SET salary = salary * (1 + vpercentual / 100)
+   WHERE department_id =  vdepartment_id;
+   DBMS_OUTPUT.PUT_LINE('Número de linhas afetadas: ' || SQL%ROWCOUNT);
+   --DBMS_OUTPUT.PUT_LINE('Retorna True se o cursor afetou uma ou mais linhas: ' || SQL%FOUND);
+   --DBMS_OUTPUT.PUT_LINE('Retorna True se o cursor não afetou nenhuma linha: ' || SQL%NOTFOUND);
+   --DBMS_OUTPUT.PUT_LINE('Retorna false, porque o Oracle controla o cursor implicito automaticamente, fechando o cursor: ' || SQL%ISOPEN);
+   -- COMMIT;  
+END;
+
+ROLLBACK;
