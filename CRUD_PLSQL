@@ -1,0 +1,24 @@
+select * from employees where employee_id = 316;
+select employees_seq.nextval from dual;
+
+SET SERVEROUTPUT ON
+DECLARE
+    nome employees.first_name%TYPE;
+BEGIN
+    select first_name into nome FROM employees where employee_id = 100;
+    DBMS_OUTPUT.PUT_LINE('Nome: ' || nome);
+END;
+
+CREATE OR REPLACE PACKAGE PR_CRUD IS 
+    PROCEDURE DELETA_EMPREGADO(employee_id employees.employee_id%TYPE);
+END PR_CRUD;
+
+CREATE OR REPLACE PACKAGE BODY PR_CRUD IS 
+    PROCEDURE DELETA_EMPREGADO(employee_id employees.employee_id%TYPE) is
+    BEGIN
+        delete from employees where employee_id = employee_id;
+        DBMS_OUTPUT.PUT_LINE('Id deletado: ' || employee_id);
+    END;
+END PR_CRUD;
+
+EXEC pr_crud.deleta_empregado(316);
