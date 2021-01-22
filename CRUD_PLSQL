@@ -1,4 +1,4 @@
-select * from employees where employee_id = 103;
+select * from employees where employee_id = 317;
 --------------------------------------------------------------------------
 select employees_seq.nextval from dual;
 --------------------------------------------------------------------------
@@ -13,6 +13,12 @@ END;
 --------------------------------------------------------------------------
 CREATE OR REPLACE PACKAGE PKG_CRUD AS 
     FUNCTION FINDBYID(pCod employees.employee_id%TYPE) RETURN employees.employee_id%TYPE;
+    
+    PROCEDURE INSERE_EMPREGADO(
+    pFirstName employees.first_name%TYPE, 
+    pLastName employees.last_name%TYPE, 
+    pEmail employees.email%TYPE);
+    
     PROCEDURE DELETA_EMPREGADO(pCod employees.employee_id%TYPE);
 END PKG_CRUD;
 --------------------------------------------------------------------------
@@ -22,20 +28,45 @@ CREATE OR REPLACE PACKAGE BODY PKG_CRUD AS
     is
     vEmployee_id employees.employee_id%TYPE;
     BEGIN
-        select employee_id into vEmployee_id from employees where employee_id = pCod; 
+        select employee_id into vEmployee_id from employees where employee_id = pCod;
+         DBMS_OUTPUT.PUT_LINE('employee_id: ' || vEmployee_id);
         RETURN vEmployee_id;  
         EXCEPTION
         when no_data_found then
             RAISE_APPLICATION_ERROR(-20001, 'employee_id: ' || pCod || ' não encontrado. ' || SQLCODE || SQLERRM);  
-    END;
+    END FINDBYID;
     
+    PROCEDURE INSERE_EMPREGADO(
+    pFirstName employees.first_name%TYPE, 
+    pLastName employees.last_name%TYPE, 
+    pEmail employees.email%TYPE) is
+    
+    qtdLinhas NUMBER;
+    e EXCEPTION;
+    
+    BEGIN    
+        select count(*) into qtdLinhas from employees where email = pEmail;
+        if(qtdLinhas > 0) then
+           RAISE e;
+        else
+            INSERT INTO employees (employee_id, first_name, last_name, email, hire_date, job_id)
+            VALUES (employees_seq.nextval, pFirstName, pLastName, pEmail, sysdate, 'ST_MAN');
+            COMMIT;
+            DBMS_OUTPUT.PUT_LINE('Dados inseridos com sucesso.');
+        end if;  
+        EXCEPTION
+          WHEN e THEN 
+            RAISE_APPLICATION_ERROR(-20001, 'Email: ' || pEmail || ' já existe.');
+            DBMS_OUTPUT.PUT_LINE('Email: ' || pEmail || ' já existe.');
+    END INSERE_EMPREGADO;  
+ 
     PROCEDURE DELETA_EMPREGADO(pCod employees.employee_id%TYPE) is
     vEmployee_id employees.employee_id%TYPE;
     BEGIN
         vEmployee_id := PKG_CRUD.FINDBYID(pCod);
         delete from employees where employee_id = vEmployee_id;
         DBMS_OUTPUT.PUT_LINE('Id deletado: ' || pCod);
-    END; 
+    END DELETA_EMPREGADO; 
 END PKG_CRUD;
 --------------------------------------------------------------------------
 execute PKG_CRUD.DELETA_EMPREGADO(&employee_id);
@@ -44,5 +75,15 @@ DECLARE
     vEmployee_id employees.employee_id%TYPE;
 BEGIN
     vEmployee_id := PKG_CRUD.FINDBYID(&employee_id);
-    DBMS_OUTPUT.PUT_LINE('employee_id: ' || vEmployee_id);
 END;
+--------------------------------------------------------------------------
+BEGIN
+    INSERT INTO employees (employee_id, first_name, last_name, email, hire_date, job_id)
+    VALUES (employees_seq.nextval, &pFirstName, &pLastName, &pEmail, sysdate, 'ST_MAN');
+    COMMIT;
+END;  
+--------------------------------------------------------------------------
+INSERT INTO employees (employee_id, first_name, last_name, email, hire_date, job_id)
+    VALUES (employees_seq.nextval, 'sadsad', 'sadasd', 'ss', sysdate, 'ST_MAN');
+--------------------------------------------------------------------------
+execute pkg_crud.insere_empregado('gerson', 'batista', 'gf');
