@@ -38,11 +38,11 @@ CREATE OR REPLACE PACKAGE BODY PKG_CRUD AS
     END; 
 END PKG_CRUD;
 --------------------------------------------------------------------------
-execute PKG_CRUD.DELETA_EMPREGADO(316);
+execute PKG_CRUD.DELETA_EMPREGADO(&employee_id);
 --------------------------------------------------------------------------
 DECLARE
     vEmployee_id employees.employee_id%TYPE;
 BEGIN
-    vEmployee_id := PKG_CRUD.FINDBYID(1);
+    vEmployee_id := PKG_CRUD.FINDBYID(&employee_id);
     DBMS_OUTPUT.PUT_LINE('employee_id: ' || vEmployee_id);
 END;
