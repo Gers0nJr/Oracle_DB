@@ -16,19 +16,24 @@ CREATE OR REPLACE PACKAGE PKG_CRUD AS
     PROCEDURE DELETA_EMPREGADO(pCod employees.employee_id%TYPE);
 END PKG_CRUD;
 --------------------------------------------------------------------------
-CREATE OR REPLACE PACKAGE BODY PKG_CRUD AS    
+CREATE OR REPLACE PACKAGE BODY PKG_CRUD AS  
     FUNCTION FINDBYID(pCod employees.employee_id%TYPE) 
         RETURN employees.employee_id%TYPE 
     is
     vEmployee_id employees.employee_id%TYPE;
     BEGIN
-        select employee_id into vEmployee_id from employees where employee_id = pCod;
-        RETURN vEmployee_id;
+        select employee_id into vEmployee_id from employees where employee_id = pCod; 
+        RETURN vEmployee_id;  
+        EXCEPTION
+        when no_data_found then
+            RAISE_APPLICATION_ERROR(-20001, 'employee_id: ' || pCod || ' não encontrado. ' || SQLCODE || SQLERRM);  
     END;
     
     PROCEDURE DELETA_EMPREGADO(pCod employees.employee_id%TYPE) is
+    vEmployee_id employees.employee_id%TYPE;
     BEGIN
-        delete from employees where employee_id = pCod;
+        vEmployee_id := PKG_CRUD.FINDBYID(pCod);
+        delete from employees where employee_id = vEmployee_id;
         DBMS_OUTPUT.PUT_LINE('Id deletado: ' || pCod);
     END; 
 END PKG_CRUD;
@@ -38,6 +43,6 @@ execute PKG_CRUD.DELETA_EMPREGADO(316);
 DECLARE
     vEmployee_id employees.employee_id%TYPE;
 BEGIN
-    vEmployee_id := PKG_CRUD.FINDBYID(103);
-     DBMS_OUTPUT.PUT_LINE('employee_id: ' || vEmployee_id);
+    vEmployee_id := PKG_CRUD.FINDBYID(1);
+    DBMS_OUTPUT.PUT_LINE('employee_id: ' || vEmployee_id);
 END;
