@@ -1,4 +1,4 @@
-select * from employees where employee_id = 316;
+select * from employees where employee_id = 103;
 --------------------------------------------------------------------------
 select employees_seq.nextval from dual;
 --------------------------------------------------------------------------
@@ -11,17 +11,33 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Nome: ' || nome);
 END;
 --------------------------------------------------------------------------
-CREATE OR REPLACE PACKAGE PR_CRUD AS 
+CREATE OR REPLACE PACKAGE PKG_CRUD AS 
+    FUNCTION FINDBYID(pCod employees.employee_id%TYPE) RETURN employees.employee_id%TYPE;
     PROCEDURE DELETA_EMPREGADO(pCod employees.employee_id%TYPE);
-END;
+END PKG_CRUD;
 --------------------------------------------------------------------------
-CREATE OR REPLACE PACKAGE BODY PR_CRUD AS 
+CREATE OR REPLACE PACKAGE BODY PKG_CRUD AS    
+    FUNCTION FINDBYID(pCod employees.employee_id%TYPE) 
+        RETURN employees.employee_id%TYPE 
+    is
+    vEmployee_id employees.employee_id%TYPE;
+    BEGIN
+        select employee_id into vEmployee_id from employees where employee_id = pCod;
+        RETURN vEmployee_id;
+    END;
+    
     PROCEDURE DELETA_EMPREGADO(pCod employees.employee_id%TYPE) is
     BEGIN
         delete from employees where employee_id = pCod;
         DBMS_OUTPUT.PUT_LINE('Id deletado: ' || pCod);
-    END;
-END;
+    END; 
+END PKG_CRUD;
 --------------------------------------------------------------------------
-execute pr_crud.deleta_empregado(316);
-
+execute PKG_CRUD.DELETA_EMPREGADO(316);
+--------------------------------------------------------------------------
+DECLARE
+    vEmployee_id employees.employee_id%TYPE;
+BEGIN
+    vEmployee_id := PKG_CRUD.FINDBYID(103);
+     DBMS_OUTPUT.PUT_LINE('employee_id: ' || vEmployee_id);
+END;
