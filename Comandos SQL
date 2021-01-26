@@ -1,0 +1,323 @@
+==============================================================================================================
+CREATE TABLE categoria
+(
+ codigo INT NOT NULL,
+ NOME VARCHAR2(50) NOT NULL,
+ PRIMARY KEY (codigo)
+);
+
+==============================================================================================================
+
+CREATE SEQUENCE seq_categoria
+ START WITH     1
+ INCREMENT BY   1
+ NOCACHE;
+ 
+--DROP SEQUENCE cod_categoria;
+==============================================================================================================
+
+INSERT INTO categoria (codigo, nome) values (1, 'Lazer');
+INSERT INTO categoria (codigo, nome) values (2, 'Alimentação');
+INSERT INTO categoria (codigo, nome) values (3, 'Supermercado');
+INSERT INTO categoria (codigo, nome) values (4, 'Farmácia');
+INSERT INTO categoria (codigo, nome) values (5, 'Outros');
+
+==============================================================================================================
+
+CREATE TABLE pessoa (
+  codigo INT not null primary key,
+  nome VARCHAR(50) NOT NULL,
+  logradouro VARCHAR(30),
+  numero VARCHAR(30),
+  complemento VARCHAR(30),
+  bairro VARCHAR(30),
+  cep VARCHAR(30),
+  cidade VARCHAR(30),
+  estado VARCHAR(30),
+  ativo SMALLINT NOT NULL
+);
+
+==============================================================================================================
+
+CREATE SEQUENCE seq_pessoa
+ START WITH     1
+ INCREMENT BY   1
+ NOCACHE;
+
+==============================================================================================================
+
+INSERT INTO pessoa (codigo, nome, logradouro, numero, complemento, bairro, cep, cidade, estado, ativo) 
+ values (seq_pessoa.nextval,'João Silva', 'Rua do Abacaxi', 
+ '10', null, 'Brasil', '38.400-121', 'Uberlândia', 'MG', 1);
+
+==============================================================================================================
+
+CREATE TABLE lancamento (
+  codigo int not null PRIMARY KEY,
+  descricao VARCHAR(50) NOT NULL,
+  data_vencimento DATE NOT NULL,
+  data_pagamento DATE,
+  valor DECIMAL(10,2) NOT NULL,
+  observacao VARCHAR(100),
+  tipo VARCHAR(20) NOT NULL,
+  codigo_categoria int NOT NULL,
+  codigo_pessoa int NOT NULL,
+  FOREIGN KEY (codigo_categoria) REFERENCES categoria(codigo),
+  FOREIGN KEY (codigo_pessoa) REFERENCES pessoa(codigo)
+);
+
+==============================================================================================================
+
+CREATE SEQUENCE seq_lancamento
+ START WITH     1
+ INCREMENT BY   1
+ NOCACHE;
+ 
+==============================================================================================================
+
+INSERT INTO lancamento 
+(codigo, descricao, data_vencimento, data_pagamento, valor, observacao, tipo, codigo_categoria, codigo_pessoa) 
+values (seq_lancamento.nextval,'Salário mensal', sysdate, null, 6500.00, 'Distribuição de lucros', 'RECEITA', 1, 1);
+
+==============================================================================================================
+
+CREATE TABLE usuario (
+	codigo int not null PRIMARY KEY,
+	nome VARCHAR(50) NOT NULL,
+	email VARCHAR(50) NOT NULL,
+	senha VARCHAR(150) NOT NULL
+);
+
+==============================================================================================================
+
+CREATE SEQUENCE seq_usuario
+ START WITH     1
+ INCREMENT BY   1
+ NOCACHE;
+ 
+==============================================================================================================
+
+INSERT INTO usuario (codigo, nome, email, senha) 
+values (1, 'Administrador', 'admin@algamoney.com', '$2a$10$X607ZPhQ4EgGNaYKt3n4SONjIv9zc.VMWdEuhCuba7oLAL5IvcL5.');
+
+==============================================================================================================
+
+CREATE TABLE permissao (
+	codigo int not null PRIMARY KEY,
+	descricao VARCHAR(50) NOT NULL
+);
+
+==============================================================================================================
+
+CREATE SEQUENCE seq_permissao
+ START WITH     1
+ INCREMENT BY   1
+ NOCACHE;
+ 
+==============================================================================================================
+
+INSERT INTO permissao (codigo, descricao) values (1, 'ROLE_CADASTRAR_CATEGORIA');
+INSERT INTO permissao (codigo, descricao) values (2, 'ROLE_PESQUISAR_CATEGORIA');
+
+INSERT INTO permissao (codigo, descricao) values (3, 'ROLE_CADASTRAR_PESSOA');
+INSERT INTO permissao (codigo, descricao) values (4, 'ROLE_REMOVER_PESSOA');
+INSERT INTO permissao (codigo, descricao) values (5, 'ROLE_PESQUISAR_PESSOA');
+
+INSERT INTO permissao (codigo, descricao) values (6, 'ROLE_CADASTRAR_LANCAMENTO');
+INSERT INTO permissao (codigo, descricao) values (7, 'ROLE_REMOVER_LANCAMENTO');
+INSERT INTO permissao (codigo, descricao) values (8, 'ROLE_PESQUISAR_LANCAMENTO');
+
+==============================================================================================================
+
+CREATE TABLE usuario_permissao (
+	codigo_usuario int not null,
+	codigo_permissao int NOT NULL,
+	PRIMARY KEY (codigo_usuario, codigo_permissao),
+	FOREIGN KEY (codigo_usuario) REFERENCES usuario(codigo),
+	FOREIGN KEY (codigo_permissao) REFERENCES permissao(codigo)
+);
+
+==============================================================================================================
+
+INSERT INTO usuario_permissao (codigo_usuario, codigo_permissao) values (1, 1);
+INSERT INTO usuario_permissao (codigo_usuario, codigo_permissao) values (1, 2);
+INSERT INTO usuario_permissao (codigo_usuario, codigo_permissao) values (1, 3);
+INSERT INTO usuario_permissao (codigo_usuario, codigo_permissao) values (1, 4);
+INSERT INTO usuario_permissao (codigo_usuario, codigo_permissao) values (1, 5);
+INSERT INTO usuario_permissao (codigo_usuario, codigo_permissao) values (1, 6);
+INSERT INTO usuario_permissao (codigo_usuario, codigo_permissao) values (1, 7);
+INSERT INTO usuario_permissao (codigo_usuario, codigo_permissao) values (1, 8);
+
+==============================================================================================================
+
+select 
+l.descricao,
+l.data_vencimento,
+l.valor,
+l.observacao,
+l.tipo,
+c.nome as descricao
+from lancamento l
+inner join categoria c on l.codigo_categoria = c.codigo;
+
+==============================================================================================================
+crud
+
+INSERT INTO funcionarios (ID,nome,salario) VALUES (ID_FUNC.NEXT_VAL,'Pedro','asasaasas');
+
+-- DML UPDATE
+UPDATE funcionarios SET salario = 1500
+WHERE id=1;
+
+-- OU Aumento de 50% sobre Salário atual.
+UPDATE funcionarios SET salario=salario*1.5
+WHERE id='2';
+
+-- exemplo update com mais de um campo
+UPDATE funcionarios SET salario=salario*1.5,setor='TI'
+WHERE id<>'1';
+
+-- DML DELETE
+DELETE
+FROM funcionarios
+WHERE id='1';
+
+-- DML SELECT EVIDENCIA DA EXCLUSAO
+SELECT *
+FROM funcionarios;
+-- WHERE id='1';
+==============================================================================================================
+
+CREATE INDEX ix_func1   ON funcionario(data_nasc);
+
+-- DDL CRIACAO DE INDEX
+ CREATE INDEX ix_func2   ON funcionario(cidade,pais);
+
+ -- Adicionando novo campo na tabela 
+ALTER TABLE funcionario ADD genero CHAR(1);
+ 
+-- SELECT * FROM funcionario
+
+ -- Renomeando campo/colunas da tabela
+ alter table funcionario RENAME COLUMN  genero TO sexo;
+ -- Modifcando tipo de campo
+ alter table funcionario MODIFY  sexo VARCHAR2(1);
+
+ -- Renomeando  tabela
+ALTER TABLE funcionario
+RENAME TO  pessoa; 
+ --  retornando situaacao anterior
+ALTER TABLE pessoa
+RENAME TO  funcionario; 
+
+-- DDL PARA ADICIONAR COLUNA NA TAB SENSO 
+  ALTER TABLE SENSO ADD ID INT;
+
+-- DDL PARA REMOVER CAMPO ID DA TABELA SENSO 
+ALTER TABLE SENSO 
+DROP COLUMN ID;
+
+-- SELECT * FROM SENSO;
+
+-- Alterando tipo da coluna
+ALTER TABLE funcionario MODIFY  endereco VARCHAR2(30);
+
+-- Excluindo campo da coluna
+ALTER TABLE funcionario DROP COLUMN sexo; 
+
+-- DDL CRIACAO DE DATABASE
+CREATE DATABASE TESTE;
+
+
+-- Excluindo database
+DROP DATABASE TESTE; 
+
+
+-- Excluindo table
+DROP TABLE SALARIO;
+
+
+-- CRIACAO DE VIEW
+CREATE VIEW v_funcionario
+	AS
+	SELECT * FROM FUNCIONARIOS
+
+
+SELECT * FROM v_funcionario;
+
+-- MODIFICANDO VIEW DE VIEW
+-- ALTER VIEW
+	create or replace VIEW v_funcionario
+	AS 
+	SELECT ID,NOME FROM FUNCIONARIOS;
+
+
+-- 
+-- Excluindo VIEW
+DROP VIEW v_funcionario; 
+
+
+-- Excluindo index
+DROP index ix_func1;
+
+
+-- CRIANDO INDEX
+CREATE INDEX IX_FUNC1 ON FUNCIONARIOS (NOME)
+
+
+-- CRIANDO PROCEDURvE procedure
+
+CREATE OR REPLACE PROCEDURE proc_quadrado (v_mum1 number)
+is
+v_mum2 number;
+BEGIN
+	 v_mum2:= v_mum1 * v_mum1;
+     DBMS_OUTPUT.put_line('Retorno: '||v_mum2);
+END;
+
+
+
+-- EXECUTANDO PROCEDURE
+SET SERVEROUTPUT ON;
+execute proc_quadrado (10);
+
+
+
+-- EXCLUINDO PROCEDURE 
+DROP PROCEDURE proc_quadrado; 
+
+
+-- Excluindo Função exemplo
+DROP function func_salario;
+
+
+-- Excluindo Trigger
+DROP trigger trig_func_salario;
+
+
+-- DDL TRUNCATE
+TRUNCATE TABLE SENSO;
+
+-- DDL TRUNCATE VERIFICANDO REGISTROS
+
+SELECT * FROM FUNCIONARIOS;
+
+
+-- CRIANDO TABELA TEMPORARIA BK EM TABELA TEMPORARIA
+CREATE GLOBAL  TEMPORARY TABLE TMP_FUNCIONARIOS
+(
+ ID INT,
+ NOME VARCHAR2(50),
+ SALARIO DECIMAL(10,2),
+ SETOR VARCHAR2(30)
+ );
+
+
+-- FAZENDO BK NA TABELAS TEMPORARIA
+INSERT INTO TMP_FUNCIONARIOS
+SELECT * FROM FUNCIONARIOS;
+
+
+-- VERIFACANDO BK NA TABELA TEMPORARIA
+SELECT * FROM TMP_FUNCIONARIOS;
+
